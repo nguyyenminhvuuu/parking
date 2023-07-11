@@ -20,7 +20,7 @@ namespace User.Controllers
             try
             {
                 var rs = await _service.GetAll();
-                return rs != null ? Ok(rs) : StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
             catch
             {

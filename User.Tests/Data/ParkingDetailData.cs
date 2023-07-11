@@ -32,6 +32,8 @@ namespace User.Tests.Data
             },
             };
         }
+
+
         public ParkingDetail GetParkingDetail()
         {
             return new ParkingDetail

@@ -27,6 +27,8 @@ namespace User.Tests.Controllers
         public async Task ParkingDetailController_GetParkings_ReturnOkAndParkingDetails()
         {
             var response = await _httpClient.GetAsync("/api/ParkingDetail");
+
+            // FluentAssertions
             response.EnsureSuccessStatusCode();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
@@ -45,7 +47,7 @@ namespace User.Tests.Controllers
             var content = await response.Content.ReadAsStringAsync();
             var parkingDetail = JsonConvert.DeserializeObject<ParkingDetail>(content);
 
-
+            // FluentAssertions
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             parkingDetail.Should().NotBeNull();
             Assert.Equivalent(parkingDetail!.Id, data.Response);
@@ -67,19 +69,24 @@ namespace User.Tests.Controllers
         {
             var parkingDetails = ParkingDetailData.Instance.GetParkingDetails();
 
+            // Moq
             var parkingMoqService = new Mock<IParkingDetailServices>();
 
             parkingMoqService.Setup(x => x.GetAll()).ReturnsAsync(parkingDetails);
+
             _pc = new ParkingDetailController(parkingMoqService.Object);
 
             parkingMoqService.Setup(s => s.GetAll()).ReturnsAsync(ParkingDetailData.Instance.GetParkingDetails());
 
             var result = await _pc.GetAll();
 
+            // FluentAssertions
             result.GetType().Should().Be(typeof(OkObjectResult));
+
             (result as OkObjectResult)!.StatusCode.Should().Be(200);
 
             var okResult = Assert.IsType<OkObjectResult>(result);
+
             Assert.Equivalent(JsonConvert.SerializeObject(parkingDetails), JsonConvert.SerializeObject(okResult.Value), strict: true);
         }
 
@@ -88,13 +95,18 @@ namespace User.Tests.Controllers
         public async Task ParkingDetailController_GetParking_ReturnOkObject()
         {
             string id = "03897ca3-8178-4cf4-9669-244a1b61a7c3";
+
             var parkingDetail = ParkingDetailData.Instance.GetParkingDetail();
+
             var parkingMoqService = new Mock<IParkingDetailServices>();
+
             parkingMoqService.Setup(x => x.GetParkingDetailById(id)).ReturnsAsync(ParkingDetailData.Instance.GetParkingDetail());
+
             _pc = new ParkingDetailController(parkingMoqService.Object);
 
             var result = await _pc.GetParkingDetailById(Guid.Parse(id));
 
+            // FluentAssertions
             result.GetType().Should().Be(typeof(OkObjectResult));
             (result as OkObjectResult)!.StatusCode.Should().Be(200);
 
