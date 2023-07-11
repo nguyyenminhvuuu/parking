@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
@@ -27,9 +28,13 @@ namespace User.Tests.Controllers
         public async Task ParkingDetailController_GetParkings_ReturnOkAndParkingDetails()
         {
             var response = await _httpClient.GetAsync("/api/ParkingDetail");
+            var content = await response.Content.ReadAsStringAsync();
+
+            var parkingDetail = JsonConvert.DeserializeObject<List<ParkingDetail>>(content);
 
             // FluentAssertions
             response.EnsureSuccessStatusCode();
+            parkingDetail.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
@@ -44,7 +49,9 @@ namespace User.Tests.Controllers
             };
 
             var response = await _httpClient.SendAsync(request);
+
             var content = await response.Content.ReadAsStringAsync();
+
             var parkingDetail = JsonConvert.DeserializeObject<ParkingDetail>(content);
 
             // FluentAssertions
@@ -64,6 +71,7 @@ namespace User.Tests.Controllers
         }
 
 
+
         [Fact]
         public async Task ParkingDetailController_GetParkings_ReturnOk()
         {
@@ -76,8 +84,6 @@ namespace User.Tests.Controllers
 
             _pc = new ParkingDetailController(parkingMoqService.Object);
 
-            parkingMoqService.Setup(s => s.GetAll()).ReturnsAsync(ParkingDetailData.Instance.GetParkingDetails());
-
             var result = await _pc.GetAll();
 
             // FluentAssertions
@@ -89,6 +95,37 @@ namespace User.Tests.Controllers
 
             Assert.Equivalent(JsonConvert.SerializeObject(parkingDetails), JsonConvert.SerializeObject(okResult.Value), strict: true);
         }
+
+        [Fact]
+        public async Task ParkingDetailController_GetParkings_ReturnStatus500()
+        {
+            var parkingMoqService = new Mock<IParkingDetailServices>();
+
+            parkingMoqService.Setup(x => x.GetAll()).ReturnsAsync((List<ParkingDetail>)null!);
+
+            _pc = new ParkingDetailController(parkingMoqService.Object);
+
+            var result = await _pc.GetAll();
+
+            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+        }
+
+        [Fact]
+        public async Task ParkingDetailController_GetParkings_ReturnBadRequest()
+        {
+            var parkingMoqService = new Mock<IParkingDetailServices>();
+
+            parkingMoqService.Setup(x => x.GetAll()).ThrowsAsync(new Exception());
+
+            _pc = new ParkingDetailController(parkingMoqService.Object);
+
+            var result = await _pc.GetAll();
+            // result.Should().BeOfType<ObjectResult>();
+            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+        }
+
+
 
 
         [Fact]
