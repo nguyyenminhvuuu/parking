@@ -107,6 +107,7 @@ namespace User.Tests.Controllers
 
             var result = await _pc.GetAll();
 
+            result.Should().BeOfType<StatusCodeResult>();
             result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
         }
 
@@ -120,9 +121,8 @@ namespace User.Tests.Controllers
             _pc = new ParkingDetailController(parkingMoqService.Object);
 
             var result = await _pc.GetAll();
-            // result.Should().BeOfType<ObjectResult>();
+            result.Should().BeOfType<BadRequestResult>();
             result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-
         }
 
 
@@ -152,5 +152,43 @@ namespace User.Tests.Controllers
         }
 
 
+        [Fact]
+        public async Task ParkingDetailController_GetParking_ReturnNotFound()
+        {
+            string id = "03897ca3-8178-4cf4-9669-244a1b61a7c3";
+
+
+            var parkingMoqService = new Mock<IParkingDetailServices>();
+
+            parkingMoqService.Setup(x => x.GetParkingDetailById(id)).ReturnsAsync((ParkingDetail)null!);
+
+            _pc = new ParkingDetailController(parkingMoqService.Object);
+
+            var result = await _pc.GetParkingDetailById(Guid.Parse(id));
+
+            // FluentAssertions
+            result.Should().BeOfType<NotFoundResult>();
+            (result as StatusCodeResult)!.StatusCode.Should().Be(404);
+        }
+
+
+        [Fact]
+        public async Task ParkingDetailController_GetParking_ReturnBadRequest()
+        {
+            string id = "03897ca3-8178-4cf4-9669-244a1b61a7c3";
+
+
+            var parkingMoqService = new Mock<IParkingDetailServices>();
+
+            parkingMoqService.Setup(x => x.GetParkingDetailById(id)).ThrowsAsync(new Exception());
+
+            _pc = new ParkingDetailController(parkingMoqService.Object);
+
+            var result = await _pc.GetParkingDetailById(Guid.Parse(id));
+
+            // FluentAssertions
+            result.Should().BeOfType<BadRequestResult>();
+            result.As<StatusCodeResult>().StatusCode.Should().Be(400);
+        }
     }
 }
