@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http.Json;
+using System.Text;
 using User.Controllers;
 using User.DTO;
 using User.Service.Interface;
@@ -69,7 +71,20 @@ namespace User.Tests.Controllers
         };
         }
 
+        [Fact]
+        public async Task LocationController_CreateOrder_ReturnStatus201()
+        {
+            string apiUrl = "https://localhost:7095/api/Location";
 
+            var request = new { name = "asd", iframe = "123" };
+
+            var jsonParse= JsonConvert.SerializeObject(request);
+
+            HttpContent httpContent = new StringContent(jsonParse, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(apiUrl, httpContent);
+            response.As<StatusCodeResult>().Should().Be(200);
+        }
 
         [Fact]
         public async Task ParkingDetailController_GetParkings_ReturnOk()
