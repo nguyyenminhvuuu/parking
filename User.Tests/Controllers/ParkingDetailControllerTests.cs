@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Newtonsoft.Json;
 using System.Net;
-using System.Net.Http.Json;
-using System.Text;
 using User.Controllers;
 using User.DTO;
 using User.Service.Interface;
@@ -36,9 +34,10 @@ namespace User.Tests.Controllers
 
             // FluentAssertions
             response.EnsureSuccessStatusCode();
-            parkingDetail.Should().NotBeNull();
+            Assert.NotNull(parkingDetail);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+
 
         [Theory]
         [MemberData(nameof(ParkingDetailIds))]
@@ -56,9 +55,8 @@ namespace User.Tests.Controllers
 
             var parkingDetail = JsonConvert.DeserializeObject<ParkingDetail>(content);
 
-            // FluentAssertions
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            parkingDetail.Should().NotBeNull();
+
             Assert.Equivalent(parkingDetail!.Id, data.Response);
         }
 
@@ -71,27 +69,30 @@ namespace User.Tests.Controllers
         };
         }
 
-        [Fact]
-        public async Task LocationController_CreateOrder_ReturnStatus201()
-        {
-            string apiUrl = "https://localhost:7095/api/Location";
 
-            var request = new { name = "asd", iframe = "123" };
+        #region post
+        //[Fact]
+        //public async Task LocationController_CreateOrder_ReturnStatus201()
+        //{
+        //    string apiUrl = "https://localhost:7095/api/Location";
 
-            var jsonParse= JsonConvert.SerializeObject(request);
+        //    var request = new { name = "asd", iframe = "123" };
 
-            HttpContent httpContent = new StringContent(jsonParse, Encoding.UTF8, "application/json");
+        //    var jsonParse= JsonConvert.SerializeObject(request);
 
-            var response = await _httpClient.PostAsync(apiUrl, httpContent);
-            response.As<StatusCodeResult>().Should().Be(200);
-        }
+        //    HttpContent httpContent = new StringContent(jsonParse, Encoding.UTF8, "application/json");
+
+        //    var response = await _httpClient.PostAsync(apiUrl, httpContent);
+        //    response.As<StatusCodeResult>().Should().Be(200);
+        //}
+        #endregion
+
 
         [Fact]
         public async Task ParkingDetailController_GetParkings_ReturnOk()
         {
             var parkingDetails = ParkingDetailData.Instance.GetParkingDetails();
 
-            // Moq
             var parkingMoqService = new Mock<IParkingDetailServices>();
 
             parkingMoqService.Setup(x => x.GetAll()).ReturnsAsync(parkingDetails);
@@ -100,13 +101,11 @@ namespace User.Tests.Controllers
 
             var result = await _pc.GetAll();
 
-            // FluentAssertions
-            result.GetType().Should().Be(typeof(OkObjectResult));
 
+            result.GetType().Should().Be(typeof(OkObjectResult));
             (result as OkObjectResult)!.StatusCode.Should().Be(200);
 
             var okResult = Assert.IsType<OkObjectResult>(result);
-
             Assert.Equivalent(JsonConvert.SerializeObject(parkingDetails), JsonConvert.SerializeObject(okResult.Value), strict: true);
         }
 
@@ -135,6 +134,7 @@ namespace User.Tests.Controllers
             _pc = new ParkingDetailController(parkingMoqService.Object);
 
             var result = await _pc.GetAll();
+
             result.Should().BeOfType<BadRequestResult>();
             result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }

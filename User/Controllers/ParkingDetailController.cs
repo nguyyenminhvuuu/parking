@@ -20,6 +20,7 @@ namespace User.Controllers
             try
             {
                 var rs = await _service.GetAll();
+
                 return rs != null ? Ok(rs) : StatusCode(StatusCodes.Status500InternalServerError);
             }
             catch
@@ -28,23 +29,6 @@ namespace User.Controllers
             }
         }
 
-
-        [HttpGet]
-        [Route("parking-id/{id}")]
-        public async Task<IActionResult> GetParkingDetailByIdParking([FromRoute] Guid id)
-        {
-            try
-            {
-                var rs = await _service.GetParkingDetailByIdParking(id);
-                return (rs != null) ? Ok(rs) : NotFound();
-            }
-            catch
-            {
-                return BadRequest();
-            }
-        }
-
-
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetParkingDetailById([FromRoute] Guid id)
@@ -52,6 +36,7 @@ namespace User.Controllers
             try
             {
                 var rs = await _service.GetParkingDetailById(id.ToString());
+
                 return rs != null ? Ok(rs) : NotFound();
             }
             catch
@@ -59,5 +44,23 @@ namespace User.Controllers
                 return BadRequest();
             }
         }
+
+
+        //[HttpGet]
+        //[Route("parking-id/{id}")]
+        //public async Task<IActionResult> GetParkingDetailByIdParking([FromRoute] Guid id)
+        //{
+        //    try
+        //    {
+        //        var rs = await _service.GetParkingDetailByIdParking(id);
+        //        return (rs != null) ? Ok(rs) : NotFound();
+        //    }
+        //    catch
+        //    {
+        //        return BadRequest();
+        //    }
+        //}
+
+
     }
 }
