@@ -66,7 +66,6 @@ namespace User.Tests.Controllers
         {
             new object[] { new RequestParkingDetailData ( Guid.Parse("03897ca3-8178-4cf4-9669-244a1b61a7c3"), Guid.Parse("03897ca3-8178-4cf4-9669-244a1b61a7c3"))},
             new object[] { new RequestParkingDetailData (Guid.Parse("041b707d-02b4-4512-989a-d098688d9ee8"), Guid.Parse("041b707d-02b4-4512-989a-d098688d9ee8"))},
-
         };
         }
 
@@ -151,7 +150,6 @@ namespace User.Tests.Controllers
             Assert.Equivalent(JsonConvert.SerializeObject(parkingDetail), JsonConvert.SerializeObject(okResult.Value));
         }
 
-
         [Fact]
         public async Task ParkingDetailController_GetParking_ReturnNotFound()
         {
@@ -170,7 +168,6 @@ namespace User.Tests.Controllers
             result.Should().BeOfType<NotFoundResult>();
             (result as StatusCodeResult)!.StatusCode.Should().Be(404);
         }
-
 
         [Fact]
         public async Task ParkingDetailController_GetParking_ReturnBadRequest()
